@@ -1,0 +1,31 @@
+a: mot
+array: mang
+about: khoang chung;sap;ga
+add: them vao
+apple: qua tao
+army: quan doi;doi quan
+beautiful: xinh dep; dep de
+book: quyen sach
+boy: con trai; cau be; dep trai; bạn trai
+ball: qua bong;qua banh;qua cau;buoi khieu vu
+big: to;lon;quan trong
+cold: lanh;nguoi;lanh lung;lanh nhat
+char: ki tu
+download: tai xuong
+dad: cha;ba;bo
+flower: hoa
+fly: bay
+family: gia dinh
+father: cha;ba;bo
+girl: co gai;con gai
+good: tot
+go: di
+handsome: dep trai
+happy: vui ve
+hat: cai non;cai mu
+king: vua;chua
+mine: min;qua min;thuy loi;ham mo;cua toi
+money: tien bac
+string: xau ki tu
+zoo: vuon thu;so thu
+zone: khu;mien
