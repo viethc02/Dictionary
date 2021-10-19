@@ -1,6 +1,8 @@
 import java.io.FileNotFoundException;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -14,7 +16,10 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 
-public class DictionaryManagement {
+public class DictionaryManagement extends Dictionary {
+    /**
+     * insert word from commandline.
+     */
     public static void insertFromCommandline() {
 
         //input word from commandLine
@@ -26,10 +31,12 @@ public class DictionaryManagement {
 
         //add word to dictionary
         Word new_word = new Word(word_in, meaning, "", "");
-        Dictionary.words.add(new_word);
-        Dictionary.num++;
+        addNewWord(new_word);
     }
 
+    /**
+     * insert word from file txt.
+     */
     public static void insertFromFile() {
         try
         {
@@ -41,14 +48,17 @@ public class DictionaryManagement {
             for (String wordData: dictionary_file) {
                 String[] data = wordData.split(":");
                 Word new_word = new Word(data[0], data[1],"", "");
-                Dictionary.words.add(new_word);
-                Dictionary.num++;
+                words.add(new_word);
+                num++;
             }
         } catch(Exception e) {
             e.printStackTrace();
         }
     }
 
+    /**
+     * insert word from JSON file.
+     */
     public static void insertFromJSONFile() {
         JSONParser parser = new JSONParser();
         try {
@@ -77,8 +87,8 @@ public class DictionaryManagement {
                 String pronounciation = (String) person.get("pronounciation");
 
                 Word new_word = new Word(word, word_explan, pronounciation, word_type);
-                Dictionary.words.add(new_word);
-                Dictionary.num++;
+                words.add(new_word);
+                num++;
 
             }
         }  catch (FileNotFoundException e) {
@@ -90,67 +100,104 @@ public class DictionaryManagement {
         }
     }
 
-    public static void dictionaryLookup() {
-        Scanner scanner = new Scanner(System.in);
-        String wordLookup = scanner.nextLine();
-
-        for (Word word : Dictionary.words) {
-            if (word.word_target.equals(wordLookup)) {
-                System.out.format("%-15s %-15s \n",
-                        "English",
-                        "Vietnamese");
-
-                System.out.format("%-15s %-15s \n",
-                        word.word_target,
-                        word.word_explain);
-            }
+    public static void insertToTrie() {
+        for (Word word: words) {
+            Trie.insertWord(word);
         }
     }
 
-    public static void ChangeWordInDictionary() {
-        Scanner sc = new Scanner(System.in);
-        String wordChange = sc.nextLine();
+    public static String addNewWord(Word newWord) {
+        if (words.contains(newWord)) {
+            return "Existing word.";
+        }
+        words.add(newWord);
+        num++;
+        Trie.insertWord(newWord);
+        return "Word has been added.";
+    }
 
+    /**
+     * look up word by trie.
+     * @param prefix
+     * @return detail of word.
+     */
+    public static String dictionaryLookup(String prefix) {
+        Word word = Trie.TrieLookUp(prefix);
+        if (word == null) {
+            return "No has result.";
+        }
+        String detail = word.getWord_pronunciation() + "\n"
+                + word.getWord_type() + "\n" + word.getWord_explain();
+        return detail;
+    }
+
+    /**
+     * suggest word from prefix
+     * @param prefix
+     * @return list of suggestions.
+     */
+    public static List<String> dictionarySearcher(String prefix) {
+        List<String> suggestionWords = new ArrayList<>();
+        suggestionWords = Trie.advanceSearch(prefix);
+        return suggestionWords;
+    }
+
+    /**
+     * change detail of word in 
+     * @param newWord
+     * @return
+     */
+    public static String ChangeWordInDictionary(Word newWord) {
         //change meaning of word
-        for (Word word: Dictionary.words) {
-            if (word.word_target.equals(wordChange)) {
-                System.out.println("Change Meaning of " + word.word_target + ":");
-                word.word_explain = sc.nextLine();
-                break;
+        String WordEdit = newWord.getWord_target();
+        for (int i = 0; i < words.size(); i++) {
+            if (words.get(i).getWord_explain().equals(WordEdit)) {
+                words.get(i).setWord_explain(newWord.getWord_explain());
+                words.get(i).setWord_pronunciation(newWord.getWord_pronunciation());
+                words.get(i).setWord_type(newWord.getWord_type());
             }
         }
+        Trie.EditWord(newWord);
+        return "Word has been changed.";
     }
 
-    public static void deleteWordInDictionary() {
-        Scanner sc = new Scanner(System.in);
-        String wordDelete = sc.nextLine();
-
+    /**
+     * delete word in 
+     * @param wordDelete
+     * @return
+     */
+    public static String deleteWordInDictionary(String wordDelete) {
         //find word need to delete and remove
-        for (Word word: Dictionary.words) {
-            if (word.word_target.equals(wordDelete)) {
-                Dictionary.words.remove(word);
-                Dictionary.num--;
-                break;
+        for (Word word: words) {
+            if (word.getWord_target().equals(wordDelete)) {
+                words.remove(word);
+                num--;
+                Trie.deleteWord(wordDelete);
+                return "Word has been deleted.";
             }
         }
+        return "Word is not exist.";
     }
 
+    /**
+     * print dictionary to txt file.
+     */
     public static void dictionaryExportToFile() {
         try {
             FileWriter myWriter = new FileWriter("dictionaryoutput.txt");
             System.out.println("Successfully wrote to the file.");
 
             //print dictionary to file
-            for (int i = 0; i < Dictionary.num; i++) {
-                myWriter.write("Word: " + Dictionary.words.get(i).word_target + "\n");
-                if (Dictionary.words.get(i).word_pronunciation != "") {
-                    myWriter.write(Dictionary.words.get(i).word_pronunciation + "\n");
+            for (int i = 0; i < num; i++) {
+                myWriter.write("Word: " + words.get(i).getWord_target() + "\n");
+                if (words.get(i).getWord_pronunciation() != "") {
+                    myWriter.write(words.get(i).getWord_pronunciation() + "\n");
                 }
-                if (Dictionary.words.get(i).word_type != "") {
-                    myWriter.write(Dictionary.words.get(i).word_type + "\n");
+                if (words.get(i).getWord_type() != "") {
+                    myWriter.write(words.get(i).getWord_type() + "\n");
                 }
-                if (Dictionary.words.get(i).word_explain != "")
-                    myWriter.write(Dictionary.words.get(i).word_explain + "\n");
+                if (words.get(i).getWord_explain() != "")
+                    myWriter.write(words.get(i).getWord_explain() + "\n");
             }
 
             myWriter.close();
