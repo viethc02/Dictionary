@@ -126,7 +126,7 @@ public class DictionaryManagement extends Dictionary {
         if (word == null) {
             return "No has result.";
         }
-        String detail = word.getWord_pronunciation() + "\n"
+        String detail = word.getWord_target() + "\n" + word.getWord_pronunciation() + "\n"
                 + word.getWord_type() + "\n" + word.getWord_explain();
         return detail;
     }
