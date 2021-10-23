@@ -180,6 +180,42 @@ public class DictionaryManagement extends Dictionary {
     }
 
     /**
+     * add new word to json file to save word.
+     */
+    public static void addNewWordToJSONFile(Word newWord) {
+        JSONParser jsonParser = new JSONParser();
+
+        try {
+            Object obj = jsonParser.parse(new FileReader("dictionary_final.json"));
+            JSONArray jsonArray = (JSONArray)obj;
+
+            //System.out.println(jsonArray);
+
+            JSONObject word = new JSONObject();
+            word.put("word", newWord.getWord_target());
+            word.put("word_type", newWord.getWord_type());
+
+            JSONArray explanations = new JSONArray();
+            explanations.add(newWord.getWord_explain());
+            word.put("eplanations", explanations);
+
+            JSONArray usages = new JSONArray();
+            word.put("usages", usages);
+            word.put("pronounciation", newWord.getWord_pronunciation());
+
+            jsonArray.add(word);
+
+            FileWriter file = new FileWriter("dictionary_final.json");
+            file.write(jsonArray.toJSONString());
+            file.flush();
+            file.close();
+
+        } catch (IOException | ParseException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * print dictionary to txt file.
      */
     public static void dictionaryExportToFile() {

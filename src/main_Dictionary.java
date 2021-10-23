@@ -116,6 +116,7 @@ public class main_Dictionary {
                             } else {
                                 Word newWord = new Word(tu.getText(), nghia.getText(), tuloai.getText(), phienam.getText());
                                 JOptionPane.showMessageDialog(frame, DictionaryManagement.addNewWord(newWord));
+                                DictionaryManagement.addNewWordToJSONFile(newWord);
                             }
                         }
                     }
