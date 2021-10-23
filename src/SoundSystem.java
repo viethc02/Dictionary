@@ -19,15 +19,9 @@ public class SoundSystem {
             //allocates a synthesizer
             synthesizer.allocate();
 
-            //resume a Synthesizer
-            synthesizer.resume();
-
             //speak the specified text until the QUEUE become empty
             synthesizer.speakPlainText(s, null);
-            synthesizer.waitEngineState(Synthesizer.QUEUE_EMPTY);
 
-            //deallocating the Synthesizer
-            synthesizer.deallocate();
         }
         catch (Exception e)
         {
