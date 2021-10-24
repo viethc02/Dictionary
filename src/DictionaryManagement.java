@@ -15,6 +15,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import javax.swing.*;
+
 
 public class DictionaryManagement extends Dictionary {
     /**
@@ -151,7 +153,7 @@ public class DictionaryManagement extends Dictionary {
         //change meaning of word
         String WordEdit = newWord.getWord_target();
         for (int i = 0; i < words.size(); i++) {
-            if (words.get(i).getWord_explain().equals(WordEdit)) {
+            if (words.get(i).getWord_target().equals(WordEdit)) {
                 words.get(i).setWord_explain(newWord.getWord_explain());
                 words.get(i).setWord_pronunciation(newWord.getWord_pronunciation());
                 words.get(i).setWord_type(newWord.getWord_type());
@@ -177,6 +179,42 @@ public class DictionaryManagement extends Dictionary {
             }
         }
         return "Word is not exist.";
+    }
+
+    /**
+     * add new word to json file to save word.
+     */
+    public static void addNewWordToJSONFile(Word newWord) {
+        JSONParser jsonParser = new JSONParser();
+
+        try {
+            Object obj = jsonParser.parse(new FileReader("dictionary_final.json"));
+            JSONArray jsonArray = (JSONArray)obj;
+
+            //System.out.println(jsonArray);
+
+            JSONObject word = new JSONObject();
+            word.put("word", newWord.getWord_target());
+            word.put("word_type", newWord.getWord_type());
+
+            JSONArray explanations = new JSONArray();
+            explanations.add(newWord.getWord_explain());
+            word.put("eplanations", explanations);
+
+            JSONArray usages = new JSONArray();
+            word.put("usages", usages);
+            word.put("pronounciation", newWord.getWord_pronunciation());
+
+            jsonArray.add(word);
+
+            FileWriter file = new FileWriter("dictionary_final.json");
+            file.write(jsonArray.toJSONString());
+            file.flush();
+            file.close();
+
+        } catch (IOException | ParseException e) {
+            e.printStackTrace();
+        }
     }
 
     /**

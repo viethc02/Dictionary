@@ -1,8 +1,10 @@
-import javax.speech.Word;
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class main_Dictionary {
@@ -18,17 +20,27 @@ public class main_Dictionary {
                 System.exit(0);
             }
         });
+        //window.getContentPane().setBackground(Color.lightGray);
 
         JPanel panel = new JPanel();
         window.add(panel);
 
-        JTextField tieng_anh = new JTextField();
-        tieng_anh.setFont(new Font("Arial", Font.TYPE1_FONT, 14));
+        JTextArea tieng_viet = new JTextArea();
+        tieng_viet.setEditable(false);
+        tieng_viet.setFont(new Font("Monospaced", Font.TYPE1_FONT, 14));
+
+        JScrollPane scrollPane1 = new JScrollPane(tieng_viet);
+        scrollPane1.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        scrollPane1.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+        panel.add(scrollPane1);
+
+        JTextArea tieng_anh = new JTextArea();
+        tieng_anh.setFont(new Font("Monospaced", Font.TYPE1_FONT, 14));
+        tieng_anh.setLineWrap(true);
         //tieng_anh.setBackground(Color.pink);
         tieng_anh.addKeyListener(new KeyListener() {
             @Override
             public void keyTyped(KeyEvent e) {
-                //System.out.print(DictionaryManagement.dictionarySearcher(tieng_anh.getText()));
 
             }
 
@@ -43,11 +55,9 @@ public class main_Dictionary {
             }
         });
 
-        JTextArea tieng_viet = new JTextArea();
-        tieng_viet.setEditable(false);
-        tieng_viet.setFont(new Font("Time New Roman", Font.TYPE1_FONT, 14));
-        JScrollPane scrollPane = new JScrollPane(tieng_viet, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-        panel.add(scrollPane);
+        JScrollPane scrollPane2 = new JScrollPane(tieng_anh);
+        scrollPane2.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        panel.add(scrollPane2);
 
         JButton button1 = new JButton("Tiếng Anh");
         JButton button2 = new JButton("Tiếng Việt");
@@ -56,8 +66,7 @@ public class main_Dictionary {
         dich.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String data = tieng_anh.getText();
-                //JOptionPane.showMessageDialog(window, DictionaryManagement.dictionaryLookup(data));
+                String data = tieng_anh.getText().trim();
                 tieng_viet.setText(DictionaryManagement.dictionaryLookup(data));
             }
         });
@@ -66,7 +75,7 @@ public class main_Dictionary {
         speak.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                SoundSystem.TurnOnSpeech(tieng_anh.getText());
+                SoundSystem.TurnOnSpeech(tieng_anh.getText().trim());
             }
         });
 
@@ -74,7 +83,93 @@ public class main_Dictionary {
         change.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (tieng_anh.getText().trim().equals("")) {
+                    JOptionPane.showMessageDialog(window, "Hãy nhập từ cần sửa!", "Error", JOptionPane.ERROR_MESSAGE);
+                } else {
+                    JFrame frame = new JFrame("Sửa");
+                    frame.setSize(400, 400);
+                    frame.setLocation((d.width - frame.getWidth()) / 2, (d.height - frame.getHeight()) / 2);
 
+                    JPanel jPanel = new JPanel();
+                    frame.add(jPanel);
+
+                    JLabel label1 = new JLabel(tieng_anh.getText());
+
+                    JLabel label2 = new JLabel("Phiên âm:");
+                    JTextArea phienam = new JTextArea();
+                    phienam.setToolTipText("Phiên âm");
+                    phienam.setLineWrap(true);
+
+                    JLabel label3 = new JLabel("Từ loại:");
+                    JTextArea tuloai = new JTextArea();
+                    tuloai.setToolTipText("Từ loại");
+                    tuloai.setLineWrap(true);
+
+                    JLabel label4 = new JLabel("Nghĩa:");
+                    JTextArea nghia = new JTextArea();
+                    nghia.setToolTipText("Nhập nghĩa (bắt buộc)");
+                    nghia.setLineWrap(true);
+                    JScrollPane jScrollPane = new JScrollPane(nghia);
+                    jScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+
+                    JButton ok = new JButton("OK");
+                    ok.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            if (nghia.getText().trim().equals("")) {
+                                JOptionPane.showMessageDialog(frame, "Bạn cần nhập nghĩa!", "Error", JOptionPane.ERROR_MESSAGE);
+                            } else {
+                                Word newWord = new Word(tieng_anh.getText(), nghia.getText(), tuloai.getText(), phienam.getText());
+                                int result = JOptionPane.showConfirmDialog(frame, "Are you sure want to change this word?",
+                                        "Edit", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+                                if (result == JOptionPane.YES_OPTION) {
+                                    JOptionPane.showMessageDialog(frame, DictionaryManagement.ChangeWordInDictionary(newWord));
+                                }
+                            }
+                        }
+                    });
+
+                    GroupLayout groupLayout = new GroupLayout(frame.getContentPane());
+                    frame.getContentPane().setLayout(groupLayout);
+                    groupLayout.setHorizontalGroup(
+                            groupLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                    .addGroup(groupLayout.createSequentialGroup()
+                                            .addComponent(label1)
+                                            .addGap(10,10,10)
+                                            .addGroup(groupLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                                    .addComponent(label2)
+                                                    .addComponent(phienam, GroupLayout.PREFERRED_SIZE, 300, GroupLayout.PREFERRED_SIZE)
+                                                    .addComponent(label3)
+                                                    .addComponent(tuloai, GroupLayout.PREFERRED_SIZE, 300, GroupLayout.PREFERRED_SIZE)
+                                                    //.addComponent(nghia, GroupLayout.PREFERRED_SIZE, 300, GroupLayout.PREFERRED_SIZE)
+                                                    .addComponent(label4)
+                                                    .addComponent(jScrollPane, GroupLayout.PREFERRED_SIZE, 315, GroupLayout.PREFERRED_SIZE)))
+                                    .addGroup(groupLayout.createSequentialGroup()
+                                            .addGap(150, 150, 150)
+                                            .addComponent(ok, 100, 100, 100))
+                    );
+
+                    groupLayout.setVerticalGroup(
+                            groupLayout.createSequentialGroup()
+                                    .addGap(10, 10, 10)
+                                    .addComponent(label1)
+                                    .addGap(10, 10, 10)
+                                    .addComponent(label2)
+                                    .addComponent(phienam, GroupLayout.PREFERRED_SIZE, 50, GroupLayout.PREFERRED_SIZE)
+                                    .addGap(10, 10, 10)
+                                    .addComponent(label3)
+                                    .addComponent(tuloai, GroupLayout.PREFERRED_SIZE, 50, GroupLayout.PREFERRED_SIZE)
+                                    .addGap(10, 10, 10)
+                                    //.addComponent(nghia, GroupLayout.PREFERRED_SIZE, 50, GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(label4)
+                                    .addComponent(jScrollPane)
+                                    .addGap(20, 20, 20)
+                                    .addComponent(ok, 30, 30, 30)
+                                    .addGap(5, 5, 5)
+                    );
+
+                    frame.setVisible(true);
+                }
             }
         });
 
@@ -84,56 +179,70 @@ public class main_Dictionary {
             public void actionPerformed(ActionEvent e) {
                 JFrame frame = new JFrame("Thêm từ");
                 frame.setSize(400, 400);
-                frame.setLocation((d.width - window.getWidth()) / 2, (d.height - window.getHeight()) / 2);
+                frame.setLocation((d.width - frame.getWidth()) / 2, (d.height - frame.getHeight()) / 2);
 
-                JPanel panel1 = new JPanel();
-                frame.add(panel1);
+                JPanel jPanel = new JPanel();
+                frame.add(jPanel);
 
+                JLabel label1 = new JLabel("Từ:");
                 JTextArea tu = new JTextArea();
-                tu.setToolTipText("Nhập Từ Tiếng Anh");
-                panel1.add(tu);
+                tu.setToolTipText("Nhập từ Tiếng Anh (bắt buộc)");
+                tu.setLineWrap(true);
 
+                JLabel label2 = new JLabel("Phiên âm:");
                 JTextArea phienam = new JTextArea();
                 phienam.setToolTipText("Phiên âm");
-                panel1.add(phienam);
+                phienam.setLineWrap(true);
 
+                JLabel label3 = new JLabel("Từ loại:");
                 JTextArea tuloai = new JTextArea();
                 tuloai.setToolTipText("Từ loại");
-                panel1.add(tuloai);
+                tuloai.setLineWrap(true);
 
+                JLabel label4 = new JLabel("Nghĩa:");
                 JTextArea nghia = new JTextArea();
-                nghia.setToolTipText("Nhập nghĩa");
-                panel1.add(nghia);
+                nghia.setToolTipText("Nhập nghĩa (bắt buộc)");
+                nghia.setLineWrap(true);
+                JScrollPane jScrollPane = new JScrollPane(nghia);
+                jScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
                 JButton ok = new JButton("OK");
                 ok.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        if (tu.getText() == null) {
-                            JOptionPane.showMessageDialog(frame, "Bạn cần nhập từ Tiếng Anh", "Error", JOptionPane.ERROR_MESSAGE);
+                        if (tu.getText().trim().equals("")) {
+                            JOptionPane.showMessageDialog(frame, "Bạn cần nhập từ Tiếng Anh!", "Error", JOptionPane.ERROR_MESSAGE);
                         } else {
-                            if (nghia.getText() == null) {
-                                JOptionPane.showMessageDialog(frame, "Bạn cần nhập nghĩa", "Error", JOptionPane.ERROR_MESSAGE);
+                            if (nghia.getText().trim().equals("")) {
+                                JOptionPane.showMessageDialog(frame, "Bạn cần nhập nghĩa!", "Error", JOptionPane.ERROR_MESSAGE);
                             } else {
                                 Word newWord = new Word(tu.getText(), nghia.getText(), tuloai.getText(), phienam.getText());
-                                //JOptionPane.showMessageDialog(frame, DictionaryManagement.addNewWord(newWord));
+                                int result = JOptionPane.showConfirmDialog(frame, "Are you sure want to add this word?",
+                                        "Add", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+                                if (result == JOptionPane.YES_OPTION) {
+                                    JOptionPane.showMessageDialog(frame, DictionaryManagement.addNewWord(newWord));
+                                }
                             }
                         }
                     }
                 });
-                panel1.add(ok);
 
                 GroupLayout groupLayout = new GroupLayout(frame.getContentPane());
                 frame.getContentPane().setLayout(groupLayout);
                 groupLayout.setHorizontalGroup(
                         groupLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                 .addGroup(groupLayout.createSequentialGroup()
-                                        .addGap(50,50,50)
+                                        .addGap(10,10,10)
                                         .addGroup(groupLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                                .addComponent(label1)
                                                 .addComponent(tu, GroupLayout.PREFERRED_SIZE, 300, GroupLayout.PREFERRED_SIZE)
+                                                .addComponent(label2)
                                                 .addComponent(phienam, GroupLayout.PREFERRED_SIZE, 300, GroupLayout.PREFERRED_SIZE)
+                                                .addComponent(label3)
                                                 .addComponent(tuloai, GroupLayout.PREFERRED_SIZE, 300, GroupLayout.PREFERRED_SIZE)
-                                                .addComponent(nghia, GroupLayout.PREFERRED_SIZE, 300, GroupLayout.PREFERRED_SIZE)))
+                                                //.addComponent(nghia, GroupLayout.PREFERRED_SIZE, 300, GroupLayout.PREFERRED_SIZE)
+                                                .addComponent(label4)
+                                                .addComponent(jScrollPane, GroupLayout.PREFERRED_SIZE, 315, GroupLayout.PREFERRED_SIZE)))
                                 .addGroup(groupLayout.createSequentialGroup()
                                         .addGap(150, 150, 150)
                                         .addComponent(ok, 100, 100, 100))
@@ -142,16 +251,21 @@ public class main_Dictionary {
                 groupLayout.setVerticalGroup(
                         groupLayout.createSequentialGroup()
                                 .addGap(10, 10, 10)
-                                .addComponent(tu, GroupLayout.PREFERRED_SIZE, 50, GroupLayout.PREFERRED_SIZE)
-                                .addGap(30, 30, 30)
-                                .addComponent(phienam, GroupLayout.PREFERRED_SIZE, 50, GroupLayout.PREFERRED_SIZE)
-                                .addGap(30, 30, 30)
+                                .addComponent(label1)
+                                .addComponent(tu, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)
+                                .addGap(10, 10, 10)
+                                .addComponent(label2)
+                                .addComponent(phienam, GroupLayout.PREFERRED_SIZE, 30, GroupLayout.PREFERRED_SIZE)
+                                .addGap(10, 10, 10)
+                                .addComponent(label3)
                                 .addComponent(tuloai, GroupLayout.PREFERRED_SIZE, 50, GroupLayout.PREFERRED_SIZE)
-                                .addGap(30, 30, 30)
-                                .addComponent(nghia, GroupLayout.PREFERRED_SIZE, 50, GroupLayout.PREFERRED_SIZE)
-                                .addGap(30, 30, 30)
+                                .addGap(10, 10, 10)
+                                //.addComponent(nghia, GroupLayout.PREFERRED_SIZE, 50, GroupLayout.PREFERRED_SIZE)
+                                .addComponent(label4)
+                                .addComponent(jScrollPane)
+                                .addGap(20, 20, 20)
                                 .addComponent(ok, 30, 30, 30)
-
+                                .addGap(5, 5, 5)
                 );
                 frame.setVisible(true);
             }
@@ -161,45 +275,65 @@ public class main_Dictionary {
         delete.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (DictionaryManagement.deleteWordInDictionary(tieng_anh.getText()) == "Word is not exist.") {
-                    JOptionPane.showMessageDialog(window, "Word is not exist.", "Error", JOptionPane.ERROR_MESSAGE);
+                if (tieng_anh.getText().trim().equals("")) {
+                    JOptionPane.showMessageDialog(window, "Hãy nhập từ cần xóa!", "Error", JOptionPane.ERROR_MESSAGE);
                 } else {
-                    JOptionPane.showMessageDialog(window, "Word has been deleted.");
+                    if (DictionaryManagement.deleteWordInDictionary(tieng_anh.getText()) == "Word is not exist.") {
+                        JOptionPane.showMessageDialog(window, "Word is not exist.", "Error", JOptionPane.ERROR_MESSAGE);
+                    } else {
+                        int result = JOptionPane.showConfirmDialog(window, "Are you sure want to delete this word?",
+                                "Delete", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+                        if (result == JOptionPane.YES_OPTION) {
+                            JOptionPane.showMessageDialog(window, "Word has been deleted.");
+                        }
+                    }
                 }
             }
         });
 
-        JButton show = new JButton("Tất cả từ");
+        JButton show = new JButton("Dịch văn bản");
         show.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                DictionaryApplication.runApplication();
+                //DictionaryApplication.runApplication();
+                try {
+                    tieng_viet.setText(GoogleTranslateAPI.TranslateByGoogleAPI("en", "vi", tieng_anh.getText().trim()));
+                } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(window, "Check your connect!", "Error", JOptionPane.ERROR_MESSAGE);
+                }
             }
         });
 
         GroupLayout layout = new GroupLayout(window.getContentPane());
         window.getContentPane().setLayout(layout);
+
         layout.setHorizontalGroup(
                 layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                         .addGroup(layout.createSequentialGroup()
-                                .addGap(25, 25, 25)
+                                .addGap(5, 5, 5)
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                         .addGroup(layout.createSequentialGroup()
-                                                .addComponent(tieng_anh, GroupLayout.PREFERRED_SIZE, 300, GroupLayout.PREFERRED_SIZE)
-                                                .addGap(20, 20, 20)
+                                                //.addComponent(tieng_anh, GroupLayout.PREFERRED_SIZE, 300, GroupLayout.PREFERRED_SIZE)
+                                                .addComponent(scrollPane2, GroupLayout.PREFERRED_SIZE, 215, GroupLayout.PREFERRED_SIZE)
+                                                .addGap(5, 5, 5)
                                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                                        .addComponent(dich, 100, 100, 100)
-                                                        .addComponent(speak, 100, 100, 100)
-                                                        .addComponent(change, 100, 100, 100)
-                                                        .addComponent(add, 100, 100, 100)
-                                                        .addComponent(delete, 100, 100, 100)
-                                                        .addComponent(show, 100, 100, 100)))
-                                        .addComponent(button1))
+                                                        .addComponent(dich)
+                                                        .addComponent(show)))
+                                        .addGroup(layout.createSequentialGroup()
+                                                .addComponent(button1)
+                                                .addGap(20, 20, 20)
+                                                .addComponent(add, 100, 100, 100)))
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 20, 20)
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                        //.addComponent(scrollPane)
-                                        .addComponent(tieng_viet, GroupLayout.PREFERRED_SIZE, 300, GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(button2)))
+                                        .addComponent(scrollPane1)
+                                        .addGroup(layout.createSequentialGroup()
+                                                .addComponent(button2)
+                                                .addGap(150, 150, 150)
+                                                .addComponent(speak))
+                                        .addGroup(layout.createSequentialGroup()
+                                                .addComponent(change)
+                                                .addGap(190, 190, 190)
+                                                .addComponent(delete))))
         );
 
         layout.setVerticalGroup(
@@ -208,36 +342,24 @@ public class main_Dictionary {
                                 .addContainerGap(10, 10)
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                         .addComponent(button1)
-                                        .addComponent(button2))
+                                        .addComponent(add)
+                                        .addComponent(button2)
+                                        .addComponent(speak))
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                        .addComponent(tieng_anh,GroupLayout.PREFERRED_SIZE, 50, GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(scrollPane2)
+                                        //.addComponent(tieng_anh,GroupLayout.PREFERRED_SIZE, 50, GroupLayout.PREFERRED_SIZE)
                                         .addGroup(layout.createSequentialGroup()
-                                        .addComponent(dich, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
-                                                .addGap(30, 30, 30)
-                                                .addComponent(speak, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
-                                                .addGap(30, 30, 30)
-                                                .addComponent(change, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
-                                                .addGap(30, 30, 30)
-                                                .addComponent(add, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
-                                                .addGap(30, 30, 30)
-                                                .addComponent(delete, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+                                                .addComponent(dich, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
                                                 .addGap(30, 30, 30)
                                                 .addComponent(show, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE))
-                                        //.addComponent(scrollPane)
-                                        .addComponent(tieng_viet, GroupLayout.PREFERRED_SIZE, 200, GroupLayout.PREFERRED_SIZE))
-//                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-//                                        .addGap(6, 6, 6)
-//                                        .addGroup(layout.createSequentialGroup()
-//                                                .addGap(10, 10, 10)
-//                                                .addComponent(speak, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
-//                                                .addGap(30, 30, 30)
-//                                                .addComponent(add, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
-//                                                .addGap(30, 30, 30)
-//                                                .addComponent(delete, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
-//                                                .addGap(30, 30, 30)
-//                                                .addComponent(show, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE))))
-                        ));
+                                        .addComponent(scrollPane1))
+                                .addGap(5, 5, 5)
+                                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                        .addComponent(change, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(delete, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE))
+                                .addGap(5, 5, 5))
+        );
 
         window.setVisible(true);
 
@@ -258,6 +380,7 @@ public class main_Dictionary {
         //String text = "i'm Testing translator system of Google";
         //System.out.println("Translate test:\n" + GoogleTranslateAPI.TranslateByGoogleAPI("en","vi",text));
         //SoundSystem.TurnOnSpeech(text);
+        //SoundSystem.TurnOnSpeech("test");
 
         //add words from jsonfile and show
 
