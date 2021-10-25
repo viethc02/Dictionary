@@ -6,12 +6,15 @@ import java.awt.event.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class main_Dictionary {
     public static void main(String[] args) throws IOException {
         Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
 
-        JFrame window = new JFrame("Dictionary");
+        //JFrame window = new JFrame("Dictionary");
+        DictionaryBackground window = new DictionaryBackground();
+        window.setTitle("Dictionary");
         window.setSize(800, 500);
         window.setLocation((d.width - window.getWidth()) / 2, (d.height - window.getHeight()) / 2);
         window.addWindowListener(new WindowAdapter() {
@@ -20,24 +23,34 @@ public class main_Dictionary {
                 System.exit(0);
             }
         });
-        //window.getContentPane().setBackground(Color.lightGray);
+        window.setBackground(new ImageIcon("Image\\main_background.png"));
 
         JPanel panel = new JPanel();
         window.add(panel);
 
-        JTextArea tieng_viet = new JTextArea();
+        JTextArea tieng_viet = new JTextArea(20, 5);
         tieng_viet.setEditable(false);
         tieng_viet.setFont(new Font("Monospaced", Font.TYPE1_FONT, 14));
+        tieng_viet.setLineWrap(true);
+        tieng_viet.setWrapStyleWord(true);
 
         JScrollPane scrollPane1 = new JScrollPane(tieng_viet);
         scrollPane1.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-        scrollPane1.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
         panel.add(scrollPane1);
+
+        DefaultListModel<String> listModel = new DefaultListModel<String>();
+        for (int i = 0; i < Dictionary.num; i++) {
+            listModel.addElement(Dictionary.words.get(i).getWord_target());
+        }
+        JList<String> list = new JList<String>(listModel);
+        list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        JScrollPane scrollPane = new JScrollPane(list);
+        panel.add(scrollPane);
 
         JTextArea tieng_anh = new JTextArea();
         tieng_anh.setFont(new Font("Monospaced", Font.TYPE1_FONT, 14));
         tieng_anh.setLineWrap(true);
-        //tieng_anh.setBackground(Color.pink);
+        tieng_anh.setWrapStyleWord(true);
         tieng_anh.addKeyListener(new KeyListener() {
             @Override
             public void keyTyped(KeyEvent e) {
@@ -46,12 +59,29 @@ public class main_Dictionary {
 
             @Override
             public void keyPressed(KeyEvent e) {
-
+//                if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
+//                    tieng_anh.getText().substring(0, tieng_anh.getText().length() - 1);
+//                }
             }
 
             @Override
             public void keyReleased(KeyEvent e) {
-                //System.out.print(DictionaryManagement.dictionarySearcher(tieng_anh.getText()));
+                listModel.removeAllElements();
+                for (int i = 0; i < Dictionary.num; i++) {
+                    if (Dictionary.words.get(i).getWord_target().startsWith(tieng_anh.getText().trim())) {
+                        listModel.addElement(Dictionary.words.get(i).getWord_target());
+                    }
+                }
+
+                list.addListSelectionListener(new ListSelectionListener() {
+                    @Override
+                    public void valueChanged(ListSelectionEvent e) {
+                        tieng_anh.setText(list.getSelectedValue());
+                        tieng_viet.setText(DictionaryManagement.dictionaryLookup(tieng_anh.getText().trim()));
+                    }
+                });
+                tieng_viet.setText(DictionaryManagement.dictionaryLookup(tieng_anh.getText().trim()));
+                //System.out.println(tieng_anh.getText().trim());
             }
         });
 
@@ -86,14 +116,16 @@ public class main_Dictionary {
                 if (tieng_anh.getText().trim().equals("")) {
                     JOptionPane.showMessageDialog(window, "Hãy nhập từ cần sửa!", "Error", JOptionPane.ERROR_MESSAGE);
                 } else {
-                    JFrame frame = new JFrame("Sửa");
+                    DictionaryBackground frame = new DictionaryBackground();
+                    frame.setTitle("Sửa");
+                    frame.setBackground(new ImageIcon("Image\\edit_background.jpg"));
                     frame.setSize(400, 400);
                     frame.setLocation((d.width - frame.getWidth()) / 2, (d.height - frame.getHeight()) / 2);
 
                     JPanel jPanel = new JPanel();
                     frame.add(jPanel);
 
-                    JLabel label1 = new JLabel(tieng_anh.getText());
+                    JLabel label1 = new JLabel(tieng_anh.getText().toUpperCase(Locale.ROOT));
 
                     JLabel label2 = new JLabel("Phiên âm:");
                     JTextArea phienam = new JTextArea();
@@ -107,7 +139,7 @@ public class main_Dictionary {
 
                     JLabel label4 = new JLabel("Nghĩa:");
                     JTextArea nghia = new JTextArea();
-                    nghia.setToolTipText("Nhập nghĩa (bắt buộc)");
+                    nghia.setToolTipText("Nhập nghĩa");
                     nghia.setLineWrap(true);
                     JScrollPane jScrollPane = new JScrollPane(nghia);
                     jScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
@@ -116,8 +148,8 @@ public class main_Dictionary {
                     ok.addActionListener(new ActionListener() {
                         @Override
                         public void actionPerformed(ActionEvent e) {
-                            if (nghia.getText().trim().equals("")) {
-                                JOptionPane.showMessageDialog(frame, "Bạn cần nhập nghĩa!", "Error", JOptionPane.ERROR_MESSAGE);
+                            if (nghia.getText().trim().equals("") || tuloai.getText().trim().equals("") || phienam.getText().trim().equals("")) {
+                                JOptionPane.showMessageDialog(frame, "Bạn chưa nhập thay đổi!", "Error", JOptionPane.ERROR_MESSAGE);
                             } else {
                                 Word newWord = new Word(tieng_anh.getText(), nghia.getText(), tuloai.getText(), phienam.getText());
                                 int result = JOptionPane.showConfirmDialog(frame, "Are you sure want to change this word?",
@@ -133,8 +165,8 @@ public class main_Dictionary {
                     frame.getContentPane().setLayout(groupLayout);
                     groupLayout.setHorizontalGroup(
                             groupLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                                    .addComponent(label1)
                                     .addGroup(groupLayout.createSequentialGroup()
-                                            .addComponent(label1)
                                             .addGap(10,10,10)
                                             .addGroup(groupLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                                     .addComponent(label2)
@@ -177,9 +209,11 @@ public class main_Dictionary {
         add.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JFrame frame = new JFrame("Thêm từ");
+                DictionaryBackground frame = new DictionaryBackground();
+                frame.setTitle("Thêm từ");
                 frame.setSize(400, 400);
                 frame.setLocation((d.width - frame.getWidth()) / 2, (d.height - frame.getHeight()) / 2);
+                frame.setBackground(new ImageIcon("Image\\add_background.jpg"));
 
                 JPanel jPanel = new JPanel();
                 frame.add(jPanel);
@@ -188,21 +222,25 @@ public class main_Dictionary {
                 JTextArea tu = new JTextArea();
                 tu.setToolTipText("Nhập từ Tiếng Anh (bắt buộc)");
                 tu.setLineWrap(true);
+                tu.setWrapStyleWord(true);
 
                 JLabel label2 = new JLabel("Phiên âm:");
                 JTextArea phienam = new JTextArea();
                 phienam.setToolTipText("Phiên âm");
                 phienam.setLineWrap(true);
+                tu.setWrapStyleWord(true);
 
                 JLabel label3 = new JLabel("Từ loại:");
                 JTextArea tuloai = new JTextArea();
                 tuloai.setToolTipText("Từ loại");
                 tuloai.setLineWrap(true);
+                tuloai.setWrapStyleWord(true);
 
                 JLabel label4 = new JLabel("Nghĩa:");
                 JTextArea nghia = new JTextArea();
                 nghia.setToolTipText("Nhập nghĩa (bắt buộc)");
                 nghia.setLineWrap(true);
+                nghia.setWrapStyleWord(true);
                 JScrollPane jScrollPane = new JScrollPane(nghia);
                 jScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
@@ -232,7 +270,7 @@ public class main_Dictionary {
                 groupLayout.setHorizontalGroup(
                         groupLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                 .addGroup(groupLayout.createSequentialGroup()
-                                        .addGap(10,10,10)
+                                        .addGap(30,30,30)
                                         .addGroup(groupLayout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                                 .addComponent(label1)
                                                 .addComponent(tu, GroupLayout.PREFERRED_SIZE, 300, GroupLayout.PREFERRED_SIZE)
@@ -314,7 +352,7 @@ public class main_Dictionary {
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                         .addGroup(layout.createSequentialGroup()
                                                 //.addComponent(tieng_anh, GroupLayout.PREFERRED_SIZE, 300, GroupLayout.PREFERRED_SIZE)
-                                                .addComponent(scrollPane2, GroupLayout.PREFERRED_SIZE, 215, GroupLayout.PREFERRED_SIZE)
+                                                .addComponent(scrollPane2, GroupLayout.PREFERRED_SIZE, 270, GroupLayout.PREFERRED_SIZE)
                                                 .addGap(5, 5, 5)
                                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                                         .addComponent(dich)
@@ -322,7 +360,8 @@ public class main_Dictionary {
                                         .addGroup(layout.createSequentialGroup()
                                                 .addComponent(button1)
                                                 .addGap(20, 20, 20)
-                                                .addComponent(add, 100, 100, 100)))
+                                                .addComponent(add, 100, 100, 100))
+                                        .addComponent(scrollPane, GroupLayout.PREFERRED_SIZE, 270, GroupLayout.PREFERRED_SIZE))
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, 20, 20)
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                         .addComponent(scrollPane1)
@@ -347,7 +386,9 @@ public class main_Dictionary {
                                         .addComponent(speak))
                                 .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                                        .addComponent(scrollPane2)
+                                        .addGroup(layout.createSequentialGroup()
+                                                .addComponent(scrollPane2, GroupLayout.PREFERRED_SIZE, 130, GroupLayout.PREFERRED_SIZE)
+                                                .addComponent(scrollPane, GroupLayout.PREFERRED_SIZE, 250, GroupLayout.PREFERRED_SIZE))
                                         //.addComponent(tieng_anh,GroupLayout.PREFERRED_SIZE, 50, GroupLayout.PREFERRED_SIZE)
                                         .addGroup(layout.createSequentialGroup()
                                                 .addComponent(dich, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
@@ -355,6 +396,7 @@ public class main_Dictionary {
                                                 .addComponent(show, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE))
                                         .addComponent(scrollPane1))
                                 .addGap(5, 5, 5)
+//                                .addComponent(scrollPane)
                                 .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                                         .addComponent(change, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE)
                                         .addComponent(delete, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE, GroupLayout.PREFERRED_SIZE))
