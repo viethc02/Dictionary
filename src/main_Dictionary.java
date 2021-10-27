@@ -129,16 +129,19 @@ public class main_Dictionary {
 
                     JLabel label2 = new JLabel("Phiên âm:");
                     JTextArea phienam = new JTextArea();
+                    phienam.setFont(new Font("Monospaced", Font.TYPE1_FONT, 14));
                     phienam.setToolTipText("Phiên âm");
                     phienam.setLineWrap(true);
 
                     JLabel label3 = new JLabel("Từ loại:");
                     JTextArea tuloai = new JTextArea();
+                    tuloai.setFont(new Font("Monospaced", Font.TYPE1_FONT, 14));
                     tuloai.setToolTipText("Từ loại");
                     tuloai.setLineWrap(true);
 
                     JLabel label4 = new JLabel("Nghĩa:");
                     JTextArea nghia = new JTextArea();
+                    nghia.setFont(new Font("Monospaced", Font.TYPE1_FONT, 14));
                     nghia.setToolTipText("Nhập nghĩa");
                     nghia.setLineWrap(true);
                     JScrollPane jScrollPane = new JScrollPane(nghia);
@@ -148,7 +151,7 @@ public class main_Dictionary {
                     ok.addActionListener(new ActionListener() {
                         @Override
                         public void actionPerformed(ActionEvent e) {
-                            if (nghia.getText().trim().equals("") || tuloai.getText().trim().equals("") || phienam.getText().trim().equals("")) {
+                            if (nghia.getText().trim().equals("") && tuloai.getText().trim().equals("") && phienam.getText().trim().equals("")) {
                                 JOptionPane.showMessageDialog(frame, "Bạn chưa nhập thay đổi!", "Error", JOptionPane.ERROR_MESSAGE);
                             } else {
                                 Word newWord = new Word(tieng_anh.getText(), nghia.getText(), tuloai.getText(), phienam.getText());
@@ -220,24 +223,28 @@ public class main_Dictionary {
 
                 JLabel label1 = new JLabel("Từ:");
                 JTextArea tu = new JTextArea();
+                tu.setFont(new Font("Monospaced", Font.TYPE1_FONT, 14));
                 tu.setToolTipText("Nhập từ Tiếng Anh (bắt buộc)");
                 tu.setLineWrap(true);
                 tu.setWrapStyleWord(true);
 
                 JLabel label2 = new JLabel("Phiên âm:");
                 JTextArea phienam = new JTextArea();
+                phienam.setFont(new Font("Monospaced", Font.TYPE1_FONT, 14));
                 phienam.setToolTipText("Phiên âm");
                 phienam.setLineWrap(true);
                 tu.setWrapStyleWord(true);
 
                 JLabel label3 = new JLabel("Từ loại:");
                 JTextArea tuloai = new JTextArea();
+                tuloai.setFont(new Font("Monospaced", Font.TYPE1_FONT, 14));
                 tuloai.setToolTipText("Từ loại");
                 tuloai.setLineWrap(true);
                 tuloai.setWrapStyleWord(true);
 
                 JLabel label4 = new JLabel("Nghĩa:");
                 JTextArea nghia = new JTextArea();
+                nghia.setFont(new Font("Monospaced", Font.TYPE1_FONT, 14));
                 nghia.setToolTipText("Nhập nghĩa (bắt buộc)");
                 nghia.setLineWrap(true);
                 nghia.setWrapStyleWord(true);
@@ -316,14 +323,10 @@ public class main_Dictionary {
                 if (tieng_anh.getText().trim().equals("")) {
                     JOptionPane.showMessageDialog(window, "Hãy nhập từ cần xóa!", "Error", JOptionPane.ERROR_MESSAGE);
                 } else {
-                    if (DictionaryManagement.deleteWordInDictionary(tieng_anh.getText()) == "Word is not exist.") {
-                        JOptionPane.showMessageDialog(window, "Word is not exist.", "Error", JOptionPane.ERROR_MESSAGE);
-                    } else {
-                        int result = JOptionPane.showConfirmDialog(window, "Are you sure want to delete this word?",
-                                "Delete", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-                        if (result == JOptionPane.YES_OPTION) {
-                            JOptionPane.showMessageDialog(window, "Word has been deleted.");
-                        }
+                    int result = JOptionPane.showConfirmDialog(window, "Are you sure want to delete this word?",
+                            "Delete", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+                    if (result == JOptionPane.YES_OPTION) {
+                        JOptionPane.showMessageDialog(window, DictionaryManagement.deleteWordInDictionary(tieng_anh.getText()));
                     }
                 }
             }

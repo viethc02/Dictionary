@@ -109,8 +109,10 @@ public class DictionaryManagement extends Dictionary {
     }
 
     public static String addNewWord(Word newWord) {
-        if (words.contains(newWord)) {
-            return "Existing word.";
+        for (int i = 0; i < Dictionary.num; i++) {
+            if (words.get(i).getWord_target().equals(newWord.getWord_target())) {
+                return "Existing word.";
+            }
         }
         words.add(newWord);
         num++;
