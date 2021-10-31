@@ -23,6 +23,9 @@ public class DictionaryBackground extends JFrame {
 
     public void setBackground(ImageIcon img)
     {
-        this.background=img;
+        this.background = img;
     }
 }
+
+//references
+//https://congdongjava.com/forum/threads/java-s%E1%BB%AD-d%E1%BB%A5ng-%E1%BA%A3nh-l%C3%A0m-background-cho-jframe.2585/

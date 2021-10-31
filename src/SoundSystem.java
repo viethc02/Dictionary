@@ -29,3 +29,6 @@ public class SoundSystem {
         }
     }
 }
+
+//references
+//https://www.javatpoint.com/convert-text-to-speech-in-java?fbclid=IwAR051qZzv7W-JnHivA71_E5nIvOnpr-DxT0xtzJjutAb1IlJp5ayPAAxrGg
